@@ -1,6 +1,6 @@
 //Constants Definition
-#define RATE 1600
-
+#define RATE 16000		//samples per second
+#define CMD "arecord -r16000 -c1 -f S16_LE -d1 -q test.wav"
 //data structures
 
 struct WAVHDR{
@@ -17,7 +17,9 @@ struct WAVHDR{
         short BlockAlign;       //NumChannels*BitsPerSample/8
         short BitsPerSample;    //in our app, 16 (-f S16_LE)
 
-        char SubChunk2ID[4];    //"data"
-        int SubChunk2Size;
+        char Subchunk2ID[4];    //"data"
+        int Subchunk2Size;
 };
+// function declaration
 void displayWAVHDR(struct WAVHDR h);
+void displayWAVDATA(short []);
