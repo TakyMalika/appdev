@@ -13,11 +13,94 @@ Table of Content
 
 1. Configuration Instructions
 
-The application is running on a Raspberry Pi 3 model B. This Pi should come
-with a USB sound card, a network connection, a microphone.
+		The application is running on a Raspberry Pi 3 model B. This Pi should come
+		with a USB sound card, a network connection, a microphone.
 
-1.1 Configure USB sound card as default audio device
+	1.1 Configure USB sound card as default audio device
 
-....
+		RPi onboard sound card doesn’t have microphone interface. It need to be changed to
+		the default audio device to be USB sound card.
 
-1.2 Install Libcurl library 
+		Boot up RPi, and apply the USB sound card. Use “lsusb” command to check if the USB
+		sound card is mounted:
+		___________________________________________________________________________________________________________	
+		│	pi@raspberrypi:~ $ lsusb									  │
+		│	Bus 001 Device 004: ID 0d8c:000c C-Media Electronics, Inc. Audio Adapter			  │
+		│	Bus 001 Device 003: ID 0424:ec00 Standard Microsystems Corp. SMSC9512/9514 Fast Ethernet Adapter  │
+		│	Bus 001 Device 002: ID 0424:9514 Standard Microsystems Corp.					  │
+		│	Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub					  │
+		│_________________________________________________________________________________________________________│
+
+		Use “sudo nano /etc/asound.conf”command and put following content to the file:
+
+		_________________________________________________________________________________________________________	
+		│	pcm.!default {											│
+		│	type plug											│
+		│		slave {											│
+		│		pcm "hw:1,0"										│
+		│		}											│
+		│	}												│
+		│	ctl.!default {											│
+		│		type hw											│
+		│		card 1											│
+		│	}												│
+		│_______________________________________________________________________________________________________│
+
+		Go to your home directory. Use “nano .asoundrc” command and put the same content to the file.
+
+		Run “alsamixer” you should be able to see that USB sound card is the default audio device. For a more
+		sensitive sound detection, it is better to maximize the volume of “Mic”.
+
+		Card: C-Media USB Headphone Set
+		Chip: USB Mixer
+		View: F3:[Playback] F4: Capture  F5: All
+		Item: Headphone [dB gain: -20.13, -20.13]
+		Adjust sound settings of the mic and dynamic according to your preferences:
+
+			   ┌──┐           ┌──┐
+			   │  │           │  │
+			   │  │           │  │
+			   │  │           │  │
+			   │  │           │  │
+			   │  │           │  │
+			   │  │           │  │
+			   │  │           │▒▒│
+			   │▒▒│           │▒▒│
+			   │▒▒│           │▒▒│
+			   │▒▒│           │▒▒│
+			   │▒▒│           │▒▒│
+			   │▒▒│           │▒▒│
+			   │▒▒│           │▒▒│
+			   ├──┤           ├──┤
+			   │OO│           │MM│
+			   └──┘           └──┘
+			  19<>19           52
+			Headphone         Mic
+
+
+	1.2 Install Libcurl library 
+
+		First use command "ls /usr/include/curl" or "ls /usr/include/arm-linux-gnueabihf/curl" to
+		 identify that libcurl library is installed.
+	
+		If the folder doesn’t exist. Run “sudo apt-get update” to update the application list.
+
+		Run “sudo apt-get install libcurl3” to install the libcurl3.
+
+		Run “sudo apt-get install libcurl4-openssl-dev” to install the development API of libcurl4.
+
+
+
+
+
+
+
+2. Installation instructions
+
+	Required software:
+		RPi files ( RPi)
+		Server files (Server)
+		PuTTY ( MOC)
+		Curl library ( RPi)
+
+
