@@ -11,6 +11,7 @@ Table of Content
 	6. Contact Information
 	7. Credits and Acknowledgement
 
+
 1. Configuration Instructions
 
 		The application is running on a Raspberry Pi 3 model B. This Pi should come
@@ -85,6 +86,36 @@ Table of Content
 		lots of useless audio files. To fix this problem, we have to downgrade alsa-util to an earlier 
 		version (1.0.25).
 
+
+		Use .sudo nano /etc/apt/sources.list. command and add the last line:
+
+			deb http://mirrordirector.raspbian.org/raspbian/ jessie main contrib non-free rpi
+			# Uncomment line below then 'apt-get update' to enable 'apt-get source'
+			#deb-src http://archive.raspbian.org/raspbian/ jessie main contrib non-free rpi
+			deb http://mirrordirector.raspbian.org/raspbian/ wheezy main contrib non-free rpi
+
+
+		Run .sudo apt-get update.
+		
+		
+		Run .sudo aptitude versions alsa-utils. to check if version 1.0.25 of alsa-util is available:
+
+			pi@raspberrypi:~ $ sudo aptitude versions alsa-utils
+			Package alsa-utils:
+			i   1.0.25-4                                    oldstable                                 500
+			p   1.0.28-1                                    stable                                    500
+			
+		
+		Run .sudo apt-get install alsa-utils=1.0.25-4. to downgrade.
+				
+		Reboot (if necessary)
+			
+		Run .arecord -r44100 -c1 -f S16_LE -d5 test.wav. to test that your microphone is working. You should see
+		a .test.wav. file in the current folder.
+		
+		Put earphone on the USB sound card. Run .aplay test.wav. to check that your recording is okay.
+		
+
 	1.3 Install Libcurl library 
 
 		First use command "ls /usr/include/curl" or "ls /usr/include/arm-linux-gnueabihf/curl" to
@@ -97,11 +128,6 @@ Table of Content
 		Run “sudo apt-get install libcurl4-openssl-dev” to install the development API of libcurl4.
 
 
-
-
-
-
-
 2. Installation instructions
 
 	Required software:
@@ -111,3 +137,180 @@ Table of Content
 		Curl library ( RPi)
 
 
+3. Operating instructions
+	3.1 Algorithm
+		I. Mandatory part:
+			Recording 1 second of audio into test.wav file using RPi
+
+			Outputting corresponding data in the console window (one of the following):
+
+			Header data and list of 80 RMS values ( DEBUG mode)
+			Sound decibel level bar chart ( non-DEBUG mode; one of the following):
+			Displayed using bar (.) symbol ( UNICODE mode)
+			Displayed using asterisk ( * ) symbol ( non-UNICODE mode)
+
+			................. .................. ...................
+			. MOC . . (commands) . . RPi .  . Sound card .
+			. (PuTTY) . . (sound . . (sound.a) . ...................
+			................. info / graph) ..................   
+			....... ...........
+			. mic . . dynamic .
+			....... ...........
+
+		II. Optional part (COMM mode):
+			Sending FastDB (8 decibel values recorded once in every 125 ms) data to the server
+
+			Storing the data on the server side (both of the following):
+
+			All the data with attached dates in sound_log.txt file
+			Last received 8 pieces of sound data in last_line.json file
+			Outputting the last obtained data on the responsive webpage real-time chart
+
+
+			............................................................................
+
+			................... ........................
+			. RPi . . (sound data) . . Server .
+			. (sound.a) . . (sound.php) .
+			................... . (soundGraph.js) .
+			. (sound.html) .
+			................... ........................
+			. MOC . . (sound graph) .
+			. (browser) .
+			................... 
+
+
+	3.2 Choosing the operating modes
+		There are some preset values ruling conditional compiling in the RPi files:
+
+			DEBUG mode - off ( non-DEBUG mode or DEBUG undefined)
+			UNICODE mode - on (UNICODE mode or UNICODE defined)
+			COMM mode - on (COMM mode or COMM defined)
+			DEBUG / non-DEBUG mode
+		The DEBUG constant is defined in sound.h. In order to set it off / on, add / remove 
+		two slashes (//) respectively in the beginning of the following line:
+
+			#define DEBUG // Conditional compiling
+			UNICODE / non-UNICODE mode
+		The UNICODE constant is defined in screen.h. In order to set it off / on, add / remove 
+		two slashes (//) respectively in the beginning of the following line:
+
+			#define UNICODE // Conditional compiling
+			COMM / non-COMM mode
+		The COMM constant is defined in comm.h. In order to set it off / on, add / remove two 
+		slashes (//) respectively in the beginning of the following line:
+
+			#define DEBUG // Conditional compiling
+			Setting the servers URL address on the RPi side
+		When COMM mode is set, one should change the URL address in comm.h file in the following line:
+
+			#define URL "http://your.server.com/.../sound.php"
+	3.3 Launching
+		Launch the RPi
+
+		Connect to the RPi via PuTTY
+
+		Make the object files and the sound.a application by running the following command:
+
+			~$ make
+		Run the application by entering the following command:
+			~$ ./sound.a
+		Go to the server's URL in the browser on the MOC
+		In order to stop the program, press Ctrl + C in the PuTTY console window.
+
+
+4 File list (manifest)
+	List:
+		RPi (8):
+
+			.c files (4):
+				comm.c
+				main.c
+				screen.c
+				sound.c
+				curltest.c
+			.h files (3):
+				comm.h
+				screen.h
+				sound.h
+			Other files (1):
+				makefile
+		Server (1):
+
+			Back-end files (1):
+				sound.php
+		Other (1):
+
+			README
+Total: 10 files
+Remark
+Even if there are no optional files, they will be created when the data transmission from RPi to the 
+server starts. 
+But, if one runs the program without data transmission from RPi, the chart will be drawn only if there is 
+last_line.json file with valid data.
+
+Valid last_line.json data example:
+{"data":"124.00;219.49;317.29;412.53;389.72;256.49;134.82;192.13;"}
+
+
+5 Copyright / Copyleft
+	This project is licensed under the GNU General Public License.
+LICENCE
+	
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+documentation files (the "Software"),to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, 
+and to permit persons to whom the Software is furnished to do so, subjectto the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
+TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+IN THE SOFTWARE.
+
+	Known bugs, problems and troubleshooting
+		"The graph is not updating on the site"
+		Problem:
+			There is only one graph state on the site and it does not change.
+
+		Solution:
+			Check the set-up
+			Check whether the sound.a is running
+			Refresh the web page
+			"There are some weird symbols changing in the console window"
+		Problem:
+			The symbols used as bars are some weird ones and completely do not seem to have a bar form.
+			The console does not recognize the UTF-8 symbol U+2590 used as a bar in screen.c file.
+
+		Solution:
+			Set the console's character set to UTF-8 or, if the console does not support UTF-8, set 
+			non-UNICODE mode.
+
+		PuTTY solution:
+			Go to the console settings (choose either way)
+
+			PuTTY - Configuration window can be reached when PuTTY is launched
+			PuTTY - Reconfiguration window can be reached by right-clicking on the top bar of the PuTTY window
+			Window (window's left side tree)
+
+			Translation (window's left side tree)
+
+			Remote character set (window's right side)
+
+			Choose UTF-8 (drop-down list)
+
+6.Contact Information
+
+	Name: Malika Tasnim Taky
+	Email:e1801588@edu.vamk.fi
+	Mobile:+358 417539336
+
+7.Credits and acknowledgments
+
+	Authors:
+	Malika Tasnim Taky - Initial work - TakyMalika(GitHub profile)
+	Used resources:
+	Gao Chao - Principal Lecturer VAMK
